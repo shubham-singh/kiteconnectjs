@@ -7,7 +7,7 @@ import * as fs from 'fs';
 //@ts-ignore
 import { KiteConnect } from '../lib/connect';
 import { AnyObject } from '../interfaces/any-object.js';
-import { Exchanges, GTTStatusTypes, OrderTypes, PositionTypes, Products, TransactionTypes, Varieties } from '../interfaces';
+import { Exchanges, GTTStatusTypes, MarketProtections, OrderTypes, PositionTypes, Products, TransactionTypes, Varieties } from '../interfaces';
 
 const mockDir = './kiteconnect-mocks';
 
@@ -44,7 +44,15 @@ function testSuite(){
       .post('/orders/test')
       .reply(200, parseJson('order_response.json'))
 
+      // placeOrder with market_protection
+      .post('/orders/test')
+      .reply(200, parseJson('order_response.json'))
+
       // modifyOrder
+      .put('/orders/test/100')
+      .reply(200, parseJson('order_modify.json'))
+
+      // modifyOrder with market_protection
       .put('/orders/test/100')
       .reply(200, parseJson('order_modify.json'))
 
@@ -234,6 +242,24 @@ function testSuite(){
         })
     });
 
+    // Place order with market_protection
+    describe('placeOrder with market_protection', function() {
+        it('Place market order with market_protection', (done) => {
+            kc.placeOrder(Varieties.TEST, {
+                'exchange': Exchanges.NSE,
+                'tradingsymbol': 'SBIN',
+                'transaction_type': TransactionTypes.BUY,
+                'quantity': 1,
+                'product': Products.MIS,
+                'order_type': OrderTypes.MARKET,
+                'market_protection': MarketProtections.AUTO})
+            .then(function(response: AnyObject) {
+                expect(response).to.have.property('order_id');
+                return done();
+            }).catch(done);
+        })
+    });
+
     // modify open pending order
     describe('modifyOrder', function() {
         it('Modify an open order', (done) => {
@@ -243,6 +269,19 @@ function testSuite(){
                 expect(response).to.have.property('order_id');
                 return done();
             }).catch(done); 
+        })
+    });
+
+    // Modify order with market_protection
+    describe('modifyOrder with market_protection', function() {
+        it('Modify an open order with market_protection', (done) => {
+            kc.modifyOrder(Varieties.TEST, 100, {
+                'price': 10,
+                'market_protection': MarketProtections.AUTO})
+            .then(function(response: AnyObject) {
+                expect(response).to.have.property('order_id');
+                return done();
+            }).catch(done);
         })
     });
 

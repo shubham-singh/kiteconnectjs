@@ -188,6 +188,14 @@ export enum Validities {
 };
 
 /**
+ * @public
+ * @enum {number}
+ */
+export enum MarketProtections {
+    AUTO = -1
+};
+
+/**
  * Represents parameters for cancelling an order.
  *
  * @remarks
@@ -615,6 +623,12 @@ export interface ModifyOrderParams {
      * @type {?(string | number)}
      */
     order_id?: string | number;
+    /**
+     * Set to `-1` for system-default market protection,
+     * or a percentage value greater than `0` up to `100`.
+     * @type {?number}
+     */
+    market_protection?: number;
 };
 
 /**
@@ -793,6 +807,12 @@ export interface PlaceOrderParams {
      * @type {?number}
      */
     price?: number;
+    /**
+     * Set to `-1` for system-default market protection,
+     * or a percentage value greater than `0` up to `100`.
+     * @type {?number}
+     */
+    market_protection?: number;
     /**
      * @type {?string}
      */
