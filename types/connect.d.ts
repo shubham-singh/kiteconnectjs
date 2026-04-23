@@ -124,13 +124,13 @@ export type Trigger = {
   updated_at: string;
   expires_at: string;
   status:
-    | 'active'
-    | 'triggered'
-    | 'disabled'
-    | 'expired'
-    | 'cancelled'
-    | 'rejected'
-    | 'deleted';
+  | 'active'
+  | 'triggered'
+  | 'disabled'
+  | 'expired'
+  | 'cancelled'
+  | 'rejected'
+  | 'deleted';
   condition: {
     exchange: string;
     last_price: number;
@@ -1212,56 +1212,56 @@ export type VirtualContractResponse = {
   * Details of charges incurred for the order
   */
   charges: {
+    /**
+    * Transaction tax amount
+    */
+    transaction_tax: number;
+    /**
+    * Type of transaction tax (e.g., STT)
+    */
+    transaction_tax_type: string;
+    /**
+    * Exchange turnover charge
+    */
+    exchange_turnover_charge: number;
+    /**
+    * SEBI turnover charge
+    */
+    sebi_turnover_charge: number;
+    /**
+    * Brokerage charge
+    */
+    brokerage: number;
+    /**
+    * Stamp duty charge
+    */
+    stamp_duty: number;
+    /**
+    * GST charges
+    */
+    gst: {
       /**
-      * Transaction tax amount
+      * Integrated GST amount
       */
-      transaction_tax: number;
+      igst: number;
       /**
-      * Type of transaction tax (e.g., STT)
+      * Central GST amount
       */
-      transaction_tax_type: string;
+      cgst: number;
       /**
-      * Exchange turnover charge
+      * State GST amount
       */
-      exchange_turnover_charge: number;
+      sgst: number;
       /**
-      * SEBI turnover charge
-      */
-      sebi_turnover_charge: number;
-      /**
-      * Brokerage charge
-      */
-      brokerage: number;
-      /**
-      * Stamp duty charge
-      */
-      stamp_duty: number;
-      /**
-      * GST charges
-      */
-      gst: {
-          /**
-          * Integrated GST amount
-          */
-          igst: number;
-          /**
-          * Central GST amount
-          */
-          cgst: number;
-          /**
-          * State GST amount
-          */
-          sgst: number;
-          /**
-          * Total GST amount
-          */
-          total: number;
-      };
-      /**
-      * Total charges incurred for the order
+      * Total GST amount
       */
       total: number;
-   };
+    };
+    /**
+    * Total charges incurred for the order
+    */
+    total: number;
+  };
 }
 
 export type GTTParams = {
@@ -1348,6 +1348,29 @@ export type KiteConnectParams = {
    * Defaults to `7000`
    */
   timeout?: number;
+};
+
+/**
+ * A single child slice in an autoslice order response. Each entry either
+ * carries an `order_id` on success or an `error` payload on failure.
+ */
+export type AutosliceChild = {
+  order_id?: string;
+  error?: {
+    code?: number;
+    error_type?: string;
+    message?: string;
+    data?: unknown;
+  };
+};
+
+/**
+ * Response for an autoslice order placement. The top-level `order_id` is the
+ * parent, and `children` holds the per-slice results.
+ */
+export type AutosliceOrderResponse = {
+  order_id: string;
+  children?: AutosliceChild[];
 };
 
 export type Connect = {
@@ -2035,7 +2058,7 @@ export type Connect = {
    * @param MarginOrder Margin fetch orders.
    * @param mode (optional) Compact mode will only give the total margins
    */
-  orderMargins: (orders: MarginOrder[], mode?:string) => Promise<Margin[]>;
+  orderMargins: (orders: MarginOrder[], mode?: string) => Promise<Margin[]>;
 
   /**
    * Retrieves the virtual contract note for the specified orders.
@@ -2043,7 +2066,7 @@ export type Connect = {
    * @param {Order[]} VirtualContractParam - The array of orders for which to retrieve the virtual contract note.
    * @returns {Promise<any>} A Promise that resolves with the virtual contract note.
    */
-   getvirtualContractNote: (orders: VirtualContractParam[]) => Promise<VirtualContractResponse[]>;
+  getvirtualContractNote: (orders: VirtualContractParam[]) => Promise<VirtualContractResponse[]>;
 
   /**
    * Place GTT.
@@ -2195,11 +2218,16 @@ export type Connect = {
        */
       tag?: string;
       /**
-       * Market protection percentage. Set to -1 for system default, or 0-100.
-       */
+       * Set to true to allow automatic order slicing for quantities exceeding freeze limits.
+       * When true, the response's `children` array contains per-slice results.
+      */
+      autoslice?: boolean;
+      /**
+        * Market protection percentage. Set to -1 for system default, or 0-100.
+      */
       market_protection?: number;
     }
-  ) => Promise<{ order_id: string }>;
+  ) => Promise<AutosliceOrderResponse>;
 
   /**
    * Renew access token by active refresh token. Renewed access token is implicitly set.
@@ -2302,7 +2330,7 @@ type KiteConnect = {
    * @example <caption>Initialize KiteConnect object</caption>
    * const kc = new KiteConnect({ api_key: apiKey })})
    */
-  new (params: KiteConnectParams): Connect;
+  new(params: KiteConnectParams): Connect;
 };
 
 declare const KiteConnect: KiteConnect;
